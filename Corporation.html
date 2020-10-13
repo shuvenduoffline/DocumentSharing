@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document Sharing Application</title>
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Corporation Management Page</h1>
+
+
+
+
+        <button id="getCorporations" onclick="getCorporations()" >Get On Board Corporation</button>
+
+        <button onclick="isCorporationOnBoard()">Check Corporation On Board</button>
+
+		<button onclick="checkCorporationPermission()">Check Corporation permissionName</button>
+
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+
+
+ 
+
+
+    <script>
+
+        const ethEnabled = () => {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+                return true;
+            }
+            return false;
+        }
+
+        //show alert when no metamusk is present
+        if (!ethEnabled()) {
+            alert("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
+        }
+
+
+
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+            console.log("Metamusk is set");
+        } else {
+            // set the provider you want from Web3.providers
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        }
+
+           
+        var defaultAddress;
+        web3.eth.getAccounts()
+        .then(result => {
+            console.log(result);
+            web3.eth.defaultAccount = result[0];
+            defaultAddress = result[0];
+        })
+        .catch(error=>{
+            console.log("Something went wrong on getting account address.")
+        })
+
+        web3.eth.net.isListening()
+         .then(() => console.log('web3 is connected'))
+         .catch(e => console.log('Wow. Something went wrong with the web3'));
+
+    const abi=  [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "successFlag",
+				"type": "bool"
+			}
+		],
+		"name": "corporationManagementEvent",
+		"type": "event"
+	},
+	{
+		"stateMutability": "nonpayable",
+		"type": "fallback"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "contractName",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "methodName",
+				"type": "bytes32"
+			}
+		],
+		"name": "addAvailableFunction",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "permissionName",
+				"type": "bytes32"
+			}
+		],
+		"name": "addCorporationPermissions",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "contractName",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "from",
+				"type": "uint256"
+			}
+		],
+		"name": "getAvailableMethods",
+		"outputs": [
+			{
+				"internalType": "bytes32[7]",
+				"name": "returnMap",
+				"type": "bytes32[7]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "from",
+				"type": "uint256"
+			}
+		],
+		"name": "getOnboardeCorporationAddresses",
+		"outputs": [
+			{
+				"internalType": "address[5]",
+				"name": "returnMap",
+				"type": "address[5]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "from",
+				"type": "uint256"
+			}
+		],
+		"name": "getOnboardeCorporationNames",
+		"outputs": [
+			{
+				"internalType": "bytes32[5]",
+				"name": "returnMap",
+				"type": "bytes32[5]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "from",
+				"type": "uint256"
+			}
+		],
+		"name": "getPermmissions",
+		"outputs": [
+			{
+				"internalType": "bytes32[5]",
+				"name": "returnMap",
+				"type": "bytes32[5]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "permissionName",
+				"type": "bytes32"
+			}
+		],
+		"name": "hasPermission",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "mhasPermission",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			}
+		],
+		"name": "isCorporationOnboarded",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "isOnboarded",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "corporationName",
+				"type": "bytes32"
+			}
+		],
+		"name": "onboardCorporation",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			}
+		],
+		"name": "removeCorporation",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "corporationAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "permissionName",
+				"type": "bytes32"
+			}
+		],
+		"name": "removeCorporationPermissions",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+
+    const contract_Address="0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9";
+    const contract = new web3.eth.Contract(abi, contract_Address);
+
+    contract.defaultAccount = defaultAddress;
+
+
+//     async function rpc(func) {
+//     while (true) {
+//         try {
+//             return await func.call();
+//         }
+//         catch (error) {
+//             if (!error.message.startsWith("Invalid JSON RPC response"))
+//                 throw error;
+//         }
+//     }
+// }
+
+    
+
+    
+    function getCorporations(){
+        console.log("Getting onboard corporation address ...")
+        const from_count = 0;
+		contract.methods.getOnboardeCorporationAddresses(from_count)
+		.call({from: defaultAddress})
+		.then(result => console.log(result))
+        .catch(error => console.log(error));
+    }
+
+    //todo update func with address
+    function isCorporationOnBoard(){
+        console.log("Checking if corporation is on board ...")
+		contract.methods.isCorporationOnboarded("0x14314f22aE42A411e2B25EbA5ddD8796BBfdB534")
+		.call({from: defaultAddress})
+		.then(result => console.log(result))
+        .catch(error => console.log(error));
+	}
+	
+	function checkCorporationPermission(){
+		console.log("Checking corporation permissions ...")
+
+		//corporation address 
+		contract.methods.getPermmissions("0x14314f22aE42A411e2B25EbA5ddD8796BBfdB534",0)
+		.call({from: defaultAddress})
+		.then(result => console.log(result))
+        .catch(error => console.log(error));
+	}
+
+    </script>
+
+</body>
+
+</html>

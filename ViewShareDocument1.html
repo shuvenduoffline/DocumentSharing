@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document Sharing Application</title>
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="styling.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+
+        <h2 class="mr-auto">List documents shared by other subsidiary</h2>
+        <table id="doctable">
+            
+            <tr>
+              <th>Doc name</th>
+              <th>Document ID</th>
+              <th>Shared by</th>
+              <th>Shared on</th>
+              <th>Download</th>
+            </tr>
+          </table>
+
+        <button class="btn mt-2" onclick="goHome()" >Home</button>
+
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+
+
+ 
+
+
+    <script>
+
+
+        function goHome(){
+            // location.replace("Corporation1.html")
+            window.history.back();
+        }
+
+        const ethEnabled = () => {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+                return true;
+            }
+            return false;
+        }
+
+        //show alert when no metamusk is present
+        if (!ethEnabled()) {
+            alert("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
+        }
+
+
+
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+            console.log("Metamusk is set");
+        } else {
+            // set the provider you want from Web3.providers
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        }
+
+
+        web3.eth.net.isListening()
+         .then(() =>
+         {
+              //load the doc on page load
+                console.log('web3 is connected')
+
+                //call the document id after all set
+                getDocuments()
+         } )
+         .catch(e => console.log('Wow. Something went wrong with the web3'));
+
+    const abi=[{
+                "inputs": [{
+                    "internalType": "address",
+                    "name": "corporationContractAddress",
+                    "type": "address"
+                }],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "anonymous": false,
+                "inputs": [{
+                        "indexed": false,
+                        "internalType": "address",
+                        "name": "corporationAddress",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "bool",
+                        "name": "successFlag",
+                        "type": "bool"
+                    }
+                ],
+                "name": "documentManagementEvent",
+                "type": "event"
+            },
+            {
+                "stateMutability": "nonpayable",
+                "type": "fallback"
+            },
+            {
+                "inputs": [{
+                        "internalType": "uint256",
+                        "name": "from",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "numberOfRecords",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "corporationContractAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "getDocumentIds",
+                "outputs": [{
+                    "internalType": "bytes",
+                    "name": "returnMap",
+                    "type": "bytes"
+                }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{
+                        "internalType": "uint256",
+                        "name": "from",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "numberOfRecords",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "corporationContractAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "getDocumentNames",
+                "outputs": [{
+                    "internalType": "bytes",
+                    "name": "returnMap",
+                    "type": "bytes"
+                }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{
+                        "internalType": "uint256",
+                        "name": "from",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "corporationContractAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "getDocumentPublishedDates",
+                "outputs": [{
+                    "internalType": "bytes32[5]",
+                    "name": "returnMap",
+                    "type": "bytes32[5]"
+                }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{
+                        "internalType": "uint256",
+                        "name": "from",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "corporationContractAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "getDocumentPublishers",
+                "outputs": [{
+                    "internalType": "address[5]",
+                    "name": "returnMap",
+                    "type": "address[5]"
+                }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{
+                        "internalType": "address",
+                        "name": "corporationContractAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "from",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "getDocumentSharingMethods",
+                "outputs": [{
+                    "internalType": "bytes32[7]",
+                    "name": "returnMap",
+                    "type": "bytes32[7]"
+                }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{
+                        "internalType": "address",
+                        "name": "assignedToAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "documentId",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "documentName",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "publishedDate",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "corporationContractAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "publishDocument",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+    const contract_Address="0x43853177d4Aa049eEB42C622fCCf393c36ac0Feb";
+    const contract = new web3.eth.Contract(abi, contract_Address);
+    const corporationContractAddress = "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9";
+
+ //   contract.defaultAccount = defaultAddress;
+
+ 
+        web3.eth.getAccounts()
+        .then(result => {
+            console.log(result);
+            web3.eth.defaultAccount = result[0];
+            contract.defaultAccount = result[0];
+        })
+        .catch(error=>{
+            console.log("Something went wrong on getting account address.")
+        })
+
+    
+
+    function getDocumentID(){
+        console.log("Getting doc ids ...")
+        const to_count = 0;
+        const from_count = 5;
+      return  contract.methods.getDocumentIds(to_count,from_count,corporationContractAddress)
+        .call()
+        // .then(result => {
+        //     console.log(result);
+        //     var return_str = web3.utils.toAscii(result);
+        //     var names = return_str.split(",");
+        //     names.forEach(str => {
+        //         console.log("Res :",str);
+        //     });
+        // })
+        // .catch(error => console.log(error));
+    }
+
+    function getDocumentNames(){
+        console.log("Getting doc names ...")
+        const to_count = 0;
+        const from_count = 5;
+     return   contract.methods.getDocumentNames(to_count,from_count,corporationContractAddress)
+        .call()
+        // .then(result => {
+        //     console.log(result);
+        //     var return_str = web3.utils.toAscii(result);
+        //     var names = return_str.split(",");
+        //     names.forEach(str => {
+        //         console.log("Res :",str);
+        //         var n = str.indexOf("�");
+        //         console.log("N ",n);
+        //         console.log("RR : ",str.substr(0,n));
+        //     });
+        // })
+        // .catch(error => console.log(error));
+    }
+
+    function getDocumentPublishedDates(){
+        console.log("Getting doc publish dates ...")
+        const to_count = 0;
+        const from_count = 5;
+     return   contract.methods.getDocumentPublishedDates(to_count,corporationContractAddress)
+        .call()
+        // .then(result => {
+        //     result.forEach(res => {
+        //         console.log("Res : ", web3.utils.toAscii(res));
+        //     });
+        // })
+        // .catch(error => console.log(error));
+    }
+
+
+    function getDocumentPublisher(){
+         const to_count = 0;
+        const from_count = 5;
+      return  contract.methods.getDocumentPublishers(to_count,corporationContractAddress)
+        .call();
+        // .then(result => {
+        //     result.forEach(res => {
+        //         console.log("Res : ", web3.utils.toAscii(res));
+        //     });
+        // })
+        // .catch(error => console.log(error));
+    }
+
+    function getDocuments(){
+        console.log("Getting documents ...")
+
+
+        Promise.all([getDocumentID(),getDocumentNames(),getDocumentPublishedDates(),getDocumentPublisher()])
+        .then(results => {
+            var docIds = results[0];
+            var docNames = results[1];
+            var publishDates = results[2];
+            var publishers = results[3];
+
+            var ids = [] , docnames = [] , publish_date = [], mpublishers = [];
+
+            publishDates.forEach(res => {
+               publish_date.push(web3.utils.toAscii(res));
+            });
+
+            var return_str = web3.utils.toAscii(docNames);
+            var names = return_str.split(",");
+            names.forEach(str => {
+                console.log("Names :",str);
+                docnames.push(str)
+            });
+
+            return_str = web3.utils.toAscii(docIds);
+            names = return_str.split(",");
+            names.forEach(str => {
+                console.log("Ids :",str);
+                ids.push(str);
+            });
+
+            publishers.forEach(element => {
+                if(element !== "0x0000000000000000000000000000000000000000")
+                    mpublishers.push(element)
+            });
+
+            for(let i = 0; i < Math.min(ids.length,docnames.length,publish_date.length,mpublishers.length); i++){
+                console.log("Id : ",ids[i],"Name :",docnames[i],"Date : ",publish_date[i]);
+
+                var table = document.getElementById("doctable");
+                var row = table.insertRow(1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+                cell1.innerHTML = docnames[i];
+                cell2.innerHTML = ids[i];
+                cell3.innerHTML = mpublishers[i];
+                cell4.innerHTML = publish_date[i];
+                var DownloadLink = "https://ipfs.io/ipfs/"+cell2.innerText;
+                DownloadLink = DownloadLink.trim();
+                cell5.innerHTML = "<a href="+DownloadLink+" target='_blank'>Download</a>";
+            }
+
+        })
+        .catch(error => console.log(error))
+    }
+   
+
+   
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+
+</html>

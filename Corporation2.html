@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document Sharing Application</title>
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Corporation 2</h1>
+
+        <button  onclick="viewShareDocument()" >View Documents Shared By Other Corporation</button>
+        <button  onclick="UploadDocument()" >Upload Document</button>
+
+
+    </div>
+
+
+    <script>
+        function viewShareDocument() {
+          location.replace("ViewShareDocument2.html")
+        }
+
+        function UploadDocument() {
+          location.replace("UploadDocument2.html")
+        }
+    </script>
+
+</body>
+
+</html>
