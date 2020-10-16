@@ -6,15 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document Sharing Application</title>
+
     <script src="./node_modules/web3/dist/web3.min.js"></script>
+
+    <!-- <script src="./node_modules/truffle-hdwallet-provider/dist/index.js"></script> -->
+  
+  
     <link rel="stylesheet" href="styling.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 
 <body>
     <div class="container">
 
-        <h2 class="mr-auto">List documents shared by other subsidiary</h2>
+        <h2 class="mr-auto" id="heading">List documents shared by other subsidiary</h2>
         <table id="doctable">
             
             <tr>
@@ -27,6 +32,7 @@
           </table>
 
         <button class="btn mt-2" onclick="goHome()" >Home</button>
+        <button id="btnnxt" class="btn mt-2" onclick="getDocuments()" >Next</button>
 
     </div>
 
@@ -41,34 +47,65 @@
     <script>
 
 
+        //function to go back home
         function goHome(){
             // location.replace("Corporation1.html")
             window.history.back();
         }
 
-        const ethEnabled = () => {
-            if (window.ethereum) {
-                window.web3 = new Web3(window.ethereum);
-                window.ethereum.enable();
-                return true;
-            }
-            return false;
-        }
 
-        //show alert when no metamusk is present
-        if (!ethEnabled()) {
-            alert("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
-        }
+        //hide table initially 
+        document.getElementById("doctable").hidden = true;
+        document.getElementById("heading").innerHTML = "Loading ...";
 
 
+        // const ethEnabled = () => {
+        //     if (window.ethereum) {
+        //         window.web3 = new Web3(window.ethereum);
+        //         window.ethereum.enable();
+        //         return true;
+        //     }
+        //     return false;
+        // }
 
-        if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider);
-            console.log("Metamusk is set");
-        } else {
-            // set the provider you want from Web3.providers
-            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-        }
+        // //show alert when no metamusk is present
+        // if (!ethEnabled()) {
+        //     alert("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
+        // }
+
+
+
+        // if (typeof web3 !== 'undefined') {
+        //     web3 = new Web3(web3.currentProvider);
+        //     console.log("Metamusk is set");
+        // } else {
+        //     // set the provider you want from Web3.providers
+        //     // your network address, for example for rinkeby network :
+    
+        // }
+
+        const acc_address = "0x14314f22aE42A411e2B25EbA5ddD8796BBfdB534";
+        const contract_Address="0x43853177d4Aa049eEB42C622fCCf393c36ac0Feb";
+        const corporationContractAddress = "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9";
+
+
+
+        
+
+        const monic = "that sure now accuse control price close diagram picnic train evidence smooth";
+        const networkAddress = 'https://ropsten.infura.io/v3/34463bcdbe5c4bfbae8a4757cc7f0be1';
+        // const provider = new HDWalletProvider(monic, networkAddress);
+        // const provider = new HDWalletProvider({
+        //     mnemonic: {
+        //         phrase: monic
+        //     },
+        //     providerOrUrl:networkAddress
+        //     });
+        const mprovider = new Web3.providers.HttpProvider(networkAddress);
+        window.web3 = new Web3(mprovider);
+        console.log("Connected with infura");
+
+        web3.eth.defaultAccount = acc_address;
 
 
         web3.eth.net.isListening()
@@ -80,7 +117,10 @@
                 //call the document id after all set
                 getDocuments()
          } )
-         .catch(e => console.log('Wow. Something went wrong with the web3'));
+         .catch(e => {
+            alert('Something went wrong with the web3! Try Again!!');
+            window.history.back();
+         });
 
     const abi=[{
                 "inputs": [{
@@ -261,30 +301,33 @@
                 "type": "function"
             }
         ];
-    const contract_Address="0x43853177d4Aa049eEB42C622fCCf393c36ac0Feb";
+
+    //needs to change accrodingly
+
     const contract = new web3.eth.Contract(abi, contract_Address);
-    const corporationContractAddress = "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9";
+        
+    //set contract default address
+    contract.defaultAccount = acc_address;
+    var starting_from = 0;
+    const number_of_records = 5;
 
  //   contract.defaultAccount = defaultAddress;
 
  
-        web3.eth.getAccounts()
-        .then(result => {
-            console.log(result);
-            web3.eth.defaultAccount = result[0];
-            contract.defaultAccount = result[0];
-        })
-        .catch(error=>{
-            console.log("Something went wrong on getting account address.")
-        })
+    // web3.eth.getAccounts()
+    //     .then(result => {
+    //         console.log(result);
+            
+    //     })
+    //     .catch(error=>{
+    //         console.log("Something went wrong on getting account address.")
+    //     })
 
     
 
     function getDocumentID(){
         console.log("Getting doc ids ...")
-        const to_count = 0;
-        const from_count = 5;
-      return  contract.methods.getDocumentIds(to_count,from_count,corporationContractAddress)
+      return  contract.methods.getDocumentIds(starting_from,number_of_records,corporationContractAddress)
         .call()
         // .then(result => {
         //     console.log(result);
@@ -299,9 +342,8 @@
 
     function getDocumentNames(){
         console.log("Getting doc names ...")
-        const to_count = 0;
-        const from_count = 5;
-     return   contract.methods.getDocumentNames(to_count,from_count,corporationContractAddress)
+        
+     return   contract.methods.getDocumentNames(starting_from,number_of_records,corporationContractAddress)
         .call()
         // .then(result => {
         //     console.log(result);
@@ -319,9 +361,7 @@
 
     function getDocumentPublishedDates(){
         console.log("Getting doc publish dates ...")
-        const to_count = 0;
-        const from_count = 5;
-     return   contract.methods.getDocumentPublishedDates(to_count,corporationContractAddress)
+     return   contract.methods.getDocumentPublishedDates(starting_from,corporationContractAddress)
         .call()
         // .then(result => {
         //     result.forEach(res => {
@@ -333,9 +373,7 @@
 
 
     function getDocumentPublisher(){
-         const to_count = 0;
-        const from_count = 5;
-      return  contract.methods.getDocumentPublishers(to_count,corporationContractAddress)
+      return  contract.methods.getDocumentPublishers(starting_from,corporationContractAddress)
         .call();
         // .then(result => {
         //     result.forEach(res => {
@@ -351,6 +389,10 @@
 
         Promise.all([getDocumentID(),getDocumentNames(),getDocumentPublishedDates(),getDocumentPublisher()])
         .then(results => {
+
+            document.getElementById("doctable").hidden = false;
+            document.getElementById("heading").innerHTML = "List documents shared by other subsidiary";
+
             var docIds = results[0];
             var docNames = results[1];
             var publishDates = results[2];
@@ -381,7 +423,8 @@
                     mpublishers.push(element)
             });
 
-            for(let i = 0; i < Math.min(ids.length,docnames.length,publish_date.length,mpublishers.length); i++){
+            const max_len = Math.min(ids.length,docnames.length,publish_date.length,mpublishers.length);
+            for(let i = 0; i < max_len; i++){
                 console.log("Id : ",ids[i],"Name :",docnames[i],"Date : ",publish_date[i]);
 
                 var table = document.getElementById("doctable");
@@ -400,6 +443,14 @@
                 cell5.innerHTML = "<a href="+DownloadLink+" target='_blank'>Download</a>";
             }
 
+            if(max_len < 5){
+                console.log("no more page");
+                //hide next button
+                document.getElementById("btnnxt").disabled = true; 
+            }else{
+                starting_from = starting_from + 5;
+            }
+
         })
         .catch(error => console.log(error))
     }
@@ -408,9 +459,9 @@
    
     </script>
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" ></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
 </body>
 

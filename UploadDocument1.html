@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document Sharing Application</title>
     <script src="./node_modules/web3/dist/web3.min.js"></script>
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
@@ -25,7 +26,7 @@
                 <input class="form-control" type="text" id="docid" name="docid" hint="Ipfs hash"><br>
                 <label for="docname">Document Name :</label><br>
                 <input class="form-control" type="text" id="docname" name="docname"><br><br>
-                <input  class="btn btn-primary" type="submit" onclick="uploadDocument()" value="Publish Document">
+                <input id="btnSubmit"  class="btn btn-primary" type="submit" onclick="uploadDocument()" value="Publish Document">
 
                 <button class="btn" onclick="goHome()" >Home</button>
             
@@ -39,38 +40,62 @@
 
 
  
-
+    <script src="./ethereumjs-tx-1.3.3.min.js"></script>
 
     <script>
 
-        const ethEnabled = () => {
-            if (window.ethereum) {
-                window.web3 = new Web3(window.ethereum);
-                window.ethereum.enable();
-                return true;
-            }
-            return false;
-        }
+        // const ethEnabled = () => {
+        //     if (window.ethereum) {
+        //         window.web3 = new Web3(window.ethereum);
+        //         window.ethereum.enable();
+        //         return true;
+        //     }
+        //     return false;
+        // }
 
-        //show alert when no metamusk is present
-        if (!ethEnabled()) {
-            alert("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
-        }
+        // //show alert when no metamusk is present
+        // if (!ethEnabled()) {
+        //     alert("Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!");
+        // }
 
 
 
-        if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider);
-            console.log("Metamusk is set");
-        } else {
-            // set the provider you want from Web3.providers
-            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-        }
+        // if (typeof web3 !== 'undefined') {
+        //     web3 = new Web3(web3.currentProvider);
+        //     console.log("Metamusk is set");
+        // } else {
+        //     // set the provider you want from Web3.providers
+        //     web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        // }
+
+
+        //todo change accordingly
+        const acc_address = "0x14314f22aE42A411e2B25EbA5ddD8796BBfdB534";
+        const privet_key = "5b86edf1987f24cd2cfdb754947a22461d64f97e14076925e35ae5d64a323e84";
+        const contract_Address="0x43853177d4Aa049eEB42C622fCCf393c36ac0Feb";
+        const corporationContractAddress = "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9";
+
+
+        // const monic = "that sure now accuse control price close diagram picnic train evidence smooth";
+        const networkAddress = 'https://ropsten.infura.io/v3/34463bcdbe5c4bfbae8a4757cc7f0be1';
+
+        const mprovider = new Web3.providers.HttpProvider(networkAddress);
+        window.web3 = new Web3(mprovider);
+
+        console.log("Connected with infura");
+
+
+        web3.eth.defaultAccount = acc_address;
+        const account_address = acc_address;
 
 
         web3.eth.net.isListening()
          .then(() => console.log('web3 is connected'))
-         .catch(e => console.log('Wow. Something went wrong with the web3'));
+         .catch(e =>{
+            alert('Something went wrong with the web3! Try Again!!');
+            window.history.back();
+
+         });
 
     const abi=[{
                 "inputs": [{
@@ -251,24 +276,23 @@
                 "type": "function"
             }
         ];
-    const contract_Address="0x43853177d4Aa049eEB42C622fCCf393c36ac0Feb";
+    
     const contract = new web3.eth.Contract(abi, contract_Address);
-    const corporationContractAddress = "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9";
-    var account_address;
+    
+
+    contract.defaultAccount = acc_address;
 
  //   contract.defaultAccount = defaultAddress;
 
  
-        web3.eth.getAccounts()
-        .then(result => {
-            console.log(result);
-            web3.eth.defaultAccount = result[0];
-            contract.defaultAccount = result[0];
-            account_address = result[0];
-        })
-        .catch(error=>{
-            console.log("Something went wrong on getting account address.")
-        })
+        // web3.eth.getAccounts()
+        // .then(result => {
+        //     console.log(result);
+
+        // })
+        // .catch(error=>{
+        //     console.log("Something went wrong on getting account address.")
+        // })
 
 
 //     async function rpc(func) {
@@ -285,82 +309,63 @@
 
     
 
-    function getDocumentID(){
-        console.log("Getting doc ids ...")
-        const to_count = 0;
-        const from_count = 5;
-        contract.methods.getDocumentIds(to_count,from_count,corporationContractAddress)
-        .call()
-        .then(result => console.log(result))
-        .catch(error => console.log(error));
-    }
+    // function getDocumentID(){
+    //     console.log("Getting doc ids ...")
+    //     const to_count = 0;
+    //     const from_count = 5;
+    //     contract.methods.getDocumentIds(to_count,from_count,corporationContractAddress)
+    //     .call()
+    //     .then(result => console.log(result))
+    //     .catch(error => console.log(error));
+    // }
 
-    function getDocumentNames(){
-        console.log("Getting doc names ...")
-        const to_count = 0;
-        const from_count = 5;
-        contract.methods.getDocumentNames(to_count,from_count,corporationContractAddress)
-        .call()
-        .then(result => {
-            console.log(result);
-            var return_str = web3.utils.toAscii(result);
-            var names = return_str.split(",");
-            names.forEach(str => {
-                console.log("Res :",str);
-                var n = str.indexOf("�");
-                console.log("N ",n);
-                console.log("RR : ",str.substr(0,n));
-            });
-        })
-        .catch(error => console.log(error));
-    }
+    // function getDocumentNames(){
+    //     console.log("Getting doc names ...")
+    //     const to_count = 0;
+    //     const from_count = 5;
+    //     contract.methods.getDocumentNames(to_count,from_count,corporationContractAddress)
+    //     .call()
+    //     .then(result => {
+    //         console.log(result);
+    //         var return_str = web3.utils.toAscii(result);
+    //         var names = return_str.split(",");
+    //         names.forEach(str => {
+    //             console.log("Res :",str);
+    //             var n = str.indexOf("�");
+    //             console.log("N ",n);
+    //             console.log("RR : ",str.substr(0,n));
+    //         });
+    //     })
+    //     .catch(error => console.log(error));
+    // }
 
-    function getDocumentPublishedDates(){
-        console.log("Getting doc publish dates ...")
-        const to_count = 0;
-        const from_count = 5;
-        contract.methods.getDocumentPublishedDates(to_count,corporationContractAddress)
-        .call()
-        .then(result => console.log(result))
-        .catch(error => console.log(error));
-    }
+    // function getDocumentPublishedDates(){
+    //     console.log("Getting doc publish dates ...")
+    //     const to_count = 0;
+    //     const from_count = 5;
+    //     contract.methods.getDocumentPublishedDates(to_count,corporationContractAddress)
+    //     .call()
+    //     .then(result => console.log(result))
+    //     .catch(error => console.log(error));
+    // }
 
 
-    function getDocumentPublishers(){
-        console.log("Getting doc publishers ...")
-        const from_count = 0;
-        contract.methods.getDocumentPublishers(from_count,corporationContractAddress)
-        .call()
-        .then(result => console.log(result))
-        .catch(error => console.log(error));
-    }
+    // function getDocumentPublishers(){
+    //     console.log("Getting doc publishers ...")
+    //     const from_count = 0;
+    //     contract.methods.getDocumentPublishers(from_count,corporationContractAddress)
+    //     .call()
+    //     .then(result => console.log(result))
+    //     .catch(error => console.log(error));
+    // }
 
-    function publishDocument(){
-        console.log("Publishing dummy document ...")
-        const ipfsHash = "QmZULkCELmmk5XNfCgTnCyFgAVxBRBXyDHGGMVoLFLiXEN", //ipfs hash
-            docName = "MyAadharHello",   //web3.utils.fromAscii(docName)
-            publishDate = new Date().toLocaleDateString();
-
-        contract.methods
-        .publishDocument(
-            "0x14314f22aE42A411e2B25EbA5ddD8796BBfdB534",  //assign to
-        "0x001d3f1ef827552ae1114027bd3ecf1f086ba0f9",   //doc id
-        "0xd9145CCE52D386f254917e481eB44e9943F39138",  //doc name
-        "0x32322f30372f3230323000000000000000000000000000000000000000000000",  //date
-        "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9")     //corporationContractAddress
-        .send({
-            "from": "0x14314f22ae42a411e2b25eba5ddd8796bbfdb534",
-            "gas": "500000",
-            "gasPrice": "5000000000",
-            "value": "0"
-            })
-        .then(result => console.log(result))
-        .catch(error => console.log(error));
-    }
-
+   
    
 
     function uploadDocument(){
+
+
+       
         
 
         const docID = document.getElementById("docid").value;
@@ -373,8 +378,12 @@
             alert("Provide Valid Input");
             return;
         }
+
+
+        document.getElementById("btnSubmit").value = "Publishing..";
+        document.getElementById("btnSubmit").disabled = true; 
                 
-        document.getElementById("headingtxt").innerHTML = "Publishing Document ..";
+        
 
         console.log("Uploading document ..");
         console.log("doc id",docID);
@@ -390,25 +399,77 @@
             const name = web3.utils.fromAscii(docName);
             const doc_id = web3.utils.fromAscii(docID);
 
-        contract.methods
+       const data = contract.methods
         .publishDocument(
-            "0x14314f22aE42A411e2B25EbA5ddD8796BBfdB534",  //assign to
+            acc_address,  //assign to
         doc_id,   //doc id
         name,  //doc name
         publishDate,  //date
-        "0x12b8d48aedF226Da28d8c27abB6eeC6b3eEcCEf9")     //corporationContractAddress
-        .send({
-            "from": account_address,
-            "gas": "500000",
-            "gasPrice": "5000000000",
-            "value": "0"
-            })
-        .then(result => {
-            console.log(result);
-            document.getElementById("headingtxt").innerHTML = "Document Published ..";
-            location.replace("Corporation1.html");;
+       corporationContractAddress).encodeABI();     //corporationContractAddress
+        // .send({
+        //     "from": account_address,
+        //     "gas": "500000",
+        //     "gasPrice": "5000000000",
+        //     "value": "0"
+        //     })
+        // .then(result => {
+        //     console.log(result);
+        //     document.getElementById("headingtxt").innerHTML = "Document Published ..";
+        //     window.history.back();
+        // })
+        // .catch(error => console.log(error));
+
+
+        //after etherium js
+        web3.eth.getTransactionCount(acc_address, function(err,nonce){
+
+
+            ml("Nonce: ")
+            ml(nonce)
+            
+        //create transaction object
+        var tx = new ethereumjs.Tx({
+            nonce : nonce,
+            from:acc_address,
+            to:contract_Address,
+            gasPrice: web3.utils.toHex(web3.utils.toWei('20','gwei')),
+            gasLimit: 500000 , // web3.utils.toHex(web3.utils.toWei('50','gwei'))
+            value: 0,
+            data:data
+        });
+
+        //sign the transaction
+        tx.sign(ethereumjs.Buffer.Buffer.from(privet_key,'hex'));
+
+        ml("tx ")
+        ml(tx)
+
+        const raw = '0x' + tx.serialize().toString('hex');
+
+        ml("raw")
+        ml(raw)
+
+        web3.eth.sendSignedTransaction(raw, function(err, transactionHash){
+            console.log("err : ",err)
+            if(err !== null){
+                console.log("Something went wrong!!");
+                document.getElementById("btnSubmit").value = "Try Again";
+            document.getElementById("btnSubmit").disabled = false; 
+            }
+            console.log("Transaction hash :", transactionHash);
         })
-        .catch(error => console.log(error));
+        .on('receipt',function(receipt){
+            console.log("Transaction Success");
+            console.log(receipt);
+            document.getElementById("btnSubmit").value = "Done";
+            document.getElementById("btnSubmit").disabled = true; 
+            window.history.back();
+        })
+
+                    
+    })
+
+
 
         
     }
@@ -419,6 +480,10 @@
     function goHome(){
             // location.replace("Corporation1.html")
             window.history.back();
+        }
+
+        function ml(mass){
+            console.log(mass)
         }
 
 
